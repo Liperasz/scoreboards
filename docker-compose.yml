@@ -1,7 +1,7 @@
 services:
   apk:
     build: .
-    image: placar-builder
+    image: scoreboards-builder
     # as ferramentas do android só existem para x86_64 (em mac m1/m2 roda emulado, mais lento)
     platform: linux/amd64
     environment:
@@ -37,14 +37,14 @@ services:
         cd android
         ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures="$$ANDROID_ARCHS"
 
-        cp app/build/outputs/apk/release/app-release.apk /output/placar.apk
+        cp app/build/outputs/apk/release/app-release.apk /output/scoreboards.apk
 
         # no linux o arquivo sairia como root, então devolve para o usuário do host
         if [ -n "$$HOST_UID" ]; then
-            chown "$$HOST_UID:$${HOST_GID:-$$HOST_UID}" /output /output/placar.apk
+            chown "$$HOST_UID:$${HOST_GID:-$$HOST_UID}" /output /output/scoreboards.apk
         fi
 
-        echo "--- apk pronto em apk/placar.apk"
+        echo "--- apk pronto em apk/scoreboards.apk"
 
 volumes:
   gradle-cache:

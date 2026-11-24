@@ -1,19 +1,37 @@
 {
   "expo": {
-    "name": "Placar",
-    "slug": "placar-cartas",
-    "version": "2.0.0",
+    "name": "Scoreboards",
+    "slug": "scoreboards",
+    "version": "2.1.0",
     "orientation": "default",
-    "backgroundColor": "#111114",
+    "icon": "./assets/icon.png",
+    "backgroundColor": "#123b2f",
     "platforms": ["ios", "android"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.exemplo.placarcartas"
+      "bundleIdentifier": "com.liperasz.scoreboards",
+      "infoPlist": {
+        "LSApplicationCategoryType": "public.app-category.board-games"
+      }
     },
     "android": {
-      "package": "com.exemplo.placarcartas"
+      "package": "com.liperasz.scoreboards",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "monochromeImage": "./assets/adaptive-mono.png",
+        "backgroundColor": "#123b2f"
+      }
     },
     "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "imageWidth": 160,
+          "resizeMode": "contain",
+          "backgroundColor": "#123b2f"
+        }
+      ],
       [
         "expo-build-properties",
         {
@@ -23,7 +41,8 @@
             "enableShrinkResourcesInReleaseBuilds": true
           }
         }
-      ]
+      ],
+      "./plugins/withGameCategory"
     ]
   }
 }
