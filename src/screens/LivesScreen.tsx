@@ -4,7 +4,7 @@ import { addPoints } from '../engine/match';
 import { isOut, winnerOf } from '../engine/score';
 import PlayShell from '../ui/PlayShell';
 import type { PlayProps } from '../ui/PlayShell';
-import { colors, common, radius } from '../ui/theme';
+import { colors, radius } from '../ui/theme';
 
 // acima disso os corações viram número para o cartão não crescer
 const MAX_HEARTS = 10;
@@ -49,7 +49,7 @@ export default function LivesScreen(props: PlayProps) {
                     const locked = out || finished;
 
                     return (
-                        <View key={p.id} style={[common.glassCard, styles.card, { borderColor: p.color }, out && styles.out]}>
+                        <View key={p.id} style={[styles.card, { borderColor: p.color }, out && styles.out]}>
                             <Text style={styles.name} numberOfLines={1}>
                                 {p.name}
                             </Text>
@@ -78,7 +78,7 @@ export default function LivesScreen(props: PlayProps) {
                     );
 
                 })}
-                <Text style={[common.hint, styles.hint]}>{def.hint}</Text>
+                <Text style={styles.hint}>{def.hint}</Text>
             </ScrollView>
         </PlayShell>
     );
@@ -87,22 +87,30 @@ export default function LivesScreen(props: PlayProps) {
 
 const styles = StyleSheet.create({
     grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, paddingHorizontal: 16, paddingBottom: 24 },
-    card: { width: '47.5%', borderWidth: 2, alignItems: 'center', gap: 10 },
+    card: {
+        width: '47.5%',
+        borderWidth: 2,
+        borderRadius: radius.lg,
+        padding: 14,
+        backgroundColor: colors.feltDeep,
+        alignItems: 'center',
+        gap: 10,
+    },
     out: { opacity: 0.4 },
-    name: { color: colors.text, fontSize: 18, fontWeight: '800' },
+    name: { color: colors.chalk, fontSize: 18, fontWeight: '800' },
     heartsText: { color: '#ff5468', fontSize: 22, letterSpacing: 2, textAlign: 'center' },
-    empty: { color: colors.textFaint },
+    empty: { color: colors.chalkFaint },
     outTag: { color: colors.danger, fontSize: 20, fontWeight: '900' },
     row: { flexDirection: 'row', gap: 8, alignSelf: 'stretch' },
     btn: {
         flex: 1,
         paddingVertical: 11,
         borderRadius: radius.sm,
-        backgroundColor: colors.glassLight,
+        backgroundColor: 'rgba(244,239,228,0.1)',
         alignItems: 'center',
     },
     minus: { backgroundColor: 'rgba(255,84,104,0.35)' },
-    btnText: { color: colors.text, fontSize: 17, fontWeight: '800' },
+    btnText: { color: colors.chalk, fontSize: 17, fontWeight: '800' },
     off: { opacity: 0.4 },
-    hint: { width: '100%', textAlign: 'center', marginTop: 4 },
+    hint: { width: '100%', textAlign: 'center', marginTop: 4, color: colors.chalkSoft, fontSize: 14 },
 });

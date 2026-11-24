@@ -11,7 +11,7 @@ interface Props<T> {
 }
 
 // lista horizontal de opções (categorias da home, melhor de N no setup)
-export default function Chips<T extends string | number>({ options, selected, onSelect, accent = '#ffffff' }: Props<T>) {
+export default function Chips<T extends string | number>({ options, selected, onSelect, accent = colors.chalk }: Props<T>) {
 
     return (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
@@ -38,12 +38,11 @@ export default function Chips<T extends string | number>({ options, selected, on
 const styles = StyleSheet.create({
     row: { gap: 8, paddingVertical: 2 },
     chip: {
-        paddingHorizontal: 14,
-        paddingVertical: 8,
+        paddingHorizontal: 15,
+        paddingVertical: 9,
         borderRadius: 999,
-        borderWidth: 1,
-        borderColor: colors.border,
-        backgroundColor: colors.glassLight,
+        borderWidth: 1.5,
+        borderColor: colors.feltLine,
     },
-    text: { color: colors.text, fontWeight: '700', fontSize: 14 },
+    text: { color: colors.chalk, fontWeight: '700', fontSize: 14 },
 });

@@ -1,15 +1,15 @@
 import { useState } from 'react';
-import { KeyboardAvoidingView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ImageBackground, KeyboardAvoidingView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createMatch, defaultSettings } from '../engine/match';
 import type { Entry, GameDef, Match, Settings } from '../engine/types';
+import { backgroundOf } from '../games/backgrounds';
 import { bestOfLabel } from '../games/describe';
 import Chips from '../ui/Chips';
 import ColorPicker from '../ui/ColorPicker';
-import GameBackground from '../ui/GameBackground';
 import Header from '../ui/Header';
 import Stepper from '../ui/Stepper';
-import { colors, common, PLAYER_COLORS, radius } from '../ui/theme';
+import { colors, common, PLAYER_COLORS, radius, textOn } from '../ui/theme';
 
 const BEST_OF = [1, 3, 5, 7];
 const TEAM_NAMES = ['Nós', 'Eles'];
@@ -66,6 +66,7 @@ export default function SetupScreen({ def, previous, onStart, onBack }: Props) {
     const insets = useSafeAreaInsets();
     const fields = editableFields(def);
     const initial = previous?.settings ?? defaultSettings(def);
+    const [editing, setEditing] = useState<number | null>(null);
 
     const [entries, setEntries] = useState<Entry[]>(() => {
 
@@ -119,113 +120,144 @@ export default function SetupScreen({ def, previous, onStart, onBack }: Props) {
     const fixedCount = def.minPlayers === def.maxPlayers;
 
     return (
-        <GameBackground gameId={def.id} dim={0.65}>
-            <View style={[common.flex, { paddingTop: insets.top }]}>
-                <Header title={def.title} onBack={onBack} />
-                <KeyboardAvoidingView behavior="padding" style={common.flex}>
-                    <ScrollView
-                        contentContainerStyle={[styles.body, { paddingBottom: insets.bottom + 24 }]}
-                        keyboardShouldPersistTaps="handled"
-                    >
-                        <Text style={[common.hint, styles.hint]}>{def.hint}</Text>
+        <View style={styles.screen}>
+            <ImageBackground
+                source={backgroundOf(def.id)}
+                style={[styles.hero, { paddingTop: insets.top }]}
+                imageStyle={styles.heroImage}
+                resizeMethod="resize"
+            >
+                <View style={[StyleSheet.absoluteFill, styles.heroShade]} />
+                <Header title="" onBack={onBack} />
+                <View style={styles.heroText}>
+                    <Text style={styles.title}>{def.title}</Text>
+                    <Text style={styles.hint}>{def.hint}</Text>
+                </View>
+            </ImageBackground>
 
+            <KeyboardAvoidingView behavior="padding" style={common.flex}>
+                <ScrollView
+                    contentContainerStyle={[styles.body, { paddingBottom: insets.bottom + 24 }]}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    <View style={styles.sectionHead}>
+                        <Text style={common.sectionTitle}>{def.teams ? 'Times' : 'Jogadores'}</Text>
                         {!fixedCount && (
-                            <View style={styles.section}>
-                                <Text style={common.label}>{def.teams ? 'Times' : 'Jogadores'}</Text>
-                                <Stepper
-                                    value={entries.length}
-                                    min={def.minPlayers}
-                                    max={def.maxPlayers}
-                                    onChange={changeCount}
-                                />
-                            </View>
+                            <Stepper value={entries.length} min={def.minPlayers} max={def.maxPlayers} onChange={changeCount} />
                         )}
+                    </View>
 
-                        {entries.map((entry, i) => (
-                            <View key={i} style={[common.glassCard, styles.entry]}>
+                    {entries.map((entry, i) => (
+                        <View key={i} style={styles.entry}>
+                            <View style={styles.entryRow}>
+                                <TouchableOpacity
+                                    style={[styles.swatch, { backgroundColor: entry.color }]}
+                                    onPress={() => setEditing(editing === i ? null : i)}
+                                    accessibilityLabel="Trocar cor"
+                                />
                                 <TextInput
-                                    style={[styles.input, { borderLeftColor: entry.color }]}
+                                    style={styles.input}
                                     value={entry.name}
                                     onChangeText={name => updateEntry(i, { name })}
                                     placeholder={defaultName(def, i)}
-                                    placeholderTextColor={colors.textFaint}
+                                    placeholderTextColor={colors.chalkFaint}
                                     maxLength={18}
                                     selectTextOnFocus
                                 />
-                                <ColorPicker selected={entry.color} onSelect={color => updateEntry(i, { color })} />
                             </View>
-                        ))}
+                            {editing === i && (
+                                <ColorPicker
+                                    selected={entry.color}
+                                    onSelect={color => {
 
-                        {fields.bestOf && (
-                            <View style={styles.section}>
-                                <Text style={common.label}>Partida</Text>
-                                <Chips
-                                    options={BEST_OF.map(n => ({ value: n, label: bestOfLabel(n) }))}
-                                    selected={bestOf}
-                                    onSelect={setBestOf}
-                                    accent={def.accent}
+                                        updateEntry(i, { color });
+                                        setEditing(null);
+
+                                    }}
                                 />
-                            </View>
-                        )}
+                            )}
+                        </View>
+                    ))}
 
-                        {fields.target && (
-                            <View style={styles.section}>
-                                <Text style={common.label}>{targetLabel(def, bestOf)}</Text>
-                                <TextInput
-                                    style={[styles.input, styles.number]}
-                                    value={targetText}
-                                    onChangeText={setTargetText}
-                                    keyboardType="number-pad"
-                                    maxLength={5}
-                                    selectTextOnFocus
-                                />
-                            </View>
-                        )}
+                    {fields.bestOf && (
+                        <View style={styles.section}>
+                            <Text style={common.sectionTitle}>Partida</Text>
+                            <Chips
+                                options={BEST_OF.map(n => ({ value: n, label: bestOfLabel(n) }))}
+                                selected={bestOf}
+                                onSelect={setBestOf}
+                                accent={colors.gold}
+                            />
+                        </View>
+                    )}
 
-                        {fields.start && (
-                            <View style={styles.section}>
-                                <Text style={common.label}>{def.mode === 'lives' ? 'Vidas' : 'Pontos iniciais'}</Text>
-                                <TextInput
-                                    style={[styles.input, styles.number]}
-                                    value={startText}
-                                    onChangeText={setStartText}
-                                    keyboardType="number-pad"
-                                    maxLength={4}
-                                    selectTextOnFocus
-                                />
-                            </View>
-                        )}
+                    {(fields.target || fields.start) && (
+                        <View style={styles.numbers}>
+                            {fields.target && (
+                                <View style={styles.numberField}>
+                                    <Text style={common.sectionTitle}>{targetLabel(def, bestOf)}</Text>
+                                    <TextInput
+                                        style={[styles.input, styles.number]}
+                                        value={targetText}
+                                        onChangeText={setTargetText}
+                                        keyboardType="number-pad"
+                                        maxLength={5}
+                                        selectTextOnFocus
+                                    />
+                                </View>
+                            )}
+                            {fields.start && (
+                                <View style={styles.numberField}>
+                                    <Text style={common.sectionTitle}>{def.mode === 'lives' ? 'Vidas' : 'Pontos iniciais'}</Text>
+                                    <TextInput
+                                        style={[styles.input, styles.number]}
+                                        value={startText}
+                                        onChangeText={setStartText}
+                                        keyboardType="number-pad"
+                                        maxLength={4}
+                                        selectTextOnFocus
+                                    />
+                                </View>
+                            )}
+                        </View>
+                    )}
 
-                        <TouchableOpacity
-                            style={[common.primaryBtn, styles.startBtn, { backgroundColor: def.accent }]}
-                            onPress={start}
-                        >
-                            <Text style={common.primaryText}>Começar</Text>
-                        </TouchableOpacity>
-                    </ScrollView>
-                </KeyboardAvoidingView>
-            </View>
-        </GameBackground>
+                    <TouchableOpacity style={[common.primaryBtn, styles.startBtn]} onPress={start}>
+                        <Text style={[common.primaryText, { color: textOn(colors.gold) }]}>Começar a partida</Text>
+                    </TouchableOpacity>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </View>
     );
 
 }
 
 const styles = StyleSheet.create({
-    body: { paddingHorizontal: 16, gap: 12 },
-    hint: { textAlign: 'center', marginBottom: 4 },
-    section: { gap: 8, marginTop: 4 },
-    entry: { padding: 12 },
+    screen: { flex: 1, backgroundColor: colors.felt },
+    hero: { minHeight: 210, justifyContent: 'space-between', backgroundColor: colors.feltDeep, overflow: 'hidden' },
+    heroImage: { width: '100%', height: '100%' },
+    heroShade: { backgroundColor: 'rgba(11,42,33,0.62)' },
+    heroText: { paddingHorizontal: 18, paddingBottom: 18, gap: 6 },
+    title: { color: colors.chalk, fontSize: 32, fontWeight: '900', letterSpacing: -0.5 },
+    hint: { color: colors.chalkSoft, fontSize: 15, lineHeight: 21 },
+    body: { paddingHorizontal: 16, paddingTop: 18, gap: 12 },
+    sectionHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 44 },
+    section: { gap: 10, marginTop: 8 },
+    entry: { gap: 4 },
+    entryRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    swatch: { width: 44, height: 44, borderRadius: 22, borderWidth: 3, borderColor: 'rgba(244,239,228,0.25)' },
     input: {
-        backgroundColor: 'rgba(255,255,255,0.1)',
+        flex: 1,
+        backgroundColor: colors.feltDeep,
         borderRadius: radius.sm,
-        borderLeftWidth: 6,
-        borderLeftColor: 'transparent',
-        paddingHorizontal: 12,
-        paddingVertical: 10,
+        paddingHorizontal: 14,
+        paddingVertical: 11,
         fontSize: 17,
         fontWeight: '700',
-        color: colors.text,
+        color: colors.chalk,
     },
-    number: { width: 120, textAlign: 'center' },
-    startBtn: { marginTop: 12 },
+    numbers: { flexDirection: 'row', gap: 12, marginTop: 8 },
+    numberField: { flex: 1, gap: 8 },
+    number: { flex: 0, textAlign: 'center' },
+    startBtn: { marginTop: 18, backgroundColor: colors.gold },
 });

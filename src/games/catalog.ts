@@ -9,6 +9,14 @@ export const CATEGORIES: { id: Category; label: string }[] = [
 
 type GameInput = Pick<GameDef, 'id' | 'title' | 'subtitle' | 'category' | 'mode' | 'hint' | 'accent'> & Partial<GameDef>;
 
+// desenho padrão de cada modo, os jogos com tela própria trocam no catálogo
+const DEFAULT_LAYOUT: Record<GameDef['mode'], GameDef['layout']> = {
+    tap: 'split',
+    rounds: 'scorepad',
+    lives: 'lives',
+    tennis: 'court',
+};
+
 // valores padrão de um jogo, cada entrada só informa o que muda
 function game(input: GameInput): GameDef {
 
@@ -29,8 +37,11 @@ function game(input: GameInput): GameDef {
         bust: false,
         negative: false,
         buttons: [{ label: '+1', pts: 1 }],
+        extras: [],
+        chalk: false,
         alert: null,
         tennis: null,
+        layout: DEFAULT_LAYOUT[input.mode],
         ...input,
     };
 
@@ -57,15 +68,16 @@ export const GAMES: GameDef[] = [
         target: 12,
         bestOf: 1,
         clamp: true,
+        layout: 'truco',
         buttons: [
-            { label: '+1', pts: 1 },
+            { label: 'Normal', pts: 1 },
             { label: 'Truco', pts: 3 },
             { label: 'Seis', pts: 6 },
             { label: 'Nove', pts: 9 },
             { label: 'Doze', pts: 12 },
         ],
         alert: { below: 1, text: 'Mão de onze' },
-        hint: 'Mão vale 1. Truco 3, seis 6, nove 9 e doze 12.',
+        hint: 'Escolha quanto a mão vale e toque no time que ganhou.',
         accent: '#1d6b3a',
     }),
     game({
@@ -79,8 +91,9 @@ export const GAMES: GameDef[] = [
         target: 12,
         bestOf: 1,
         clamp: true,
+        layout: 'truco',
         buttons: [
-            { label: '+2', pts: 2 },
+            { label: 'Normal', pts: 2 },
             { label: 'Truco', pts: 4 },
             { label: 'Seis', pts: 6 },
             { label: 'Oito', pts: 8 },
@@ -88,7 +101,7 @@ export const GAMES: GameDef[] = [
             { label: 'Doze', pts: 12 },
         ],
         alert: { below: 2, text: 'Mão de dez' },
-        hint: 'Mão vale 2. Truco 4, seis 6, depois 8 ou 10 conforme a mesa, e doze 12.',
+        hint: 'Mão vale 2. Depois do seis, a mesa decide entre oito e dez.',
         accent: '#7a4a12',
     }),
     game({
@@ -102,15 +115,19 @@ export const GAMES: GameDef[] = [
         target: 24,
         bestOf: 1,
         clamp: true,
+        layout: 'truco',
         buttons: [
-            { label: '+1', pts: 1 },
+            { label: 'Normal', pts: 1 },
             { label: 'Truco', pts: 2 },
             { label: 'Retruco', pts: 3 },
-            { label: 'Vale 4', pts: 4 },
+            { label: 'Vale quatro', pts: 4 },
+        ],
+        extras: [
             { label: 'Envido', pts: 2 },
+            { label: 'Real envido', pts: 3 },
             { label: 'Flor', pts: 3 },
         ],
-        hint: 'Com envido e flor. Combine o alvo com a mesa (12, 24 ou 30).',
+        hint: 'Envido e flor entram direto no time. Combine o alvo com a mesa.',
         accent: '#9a2f1f',
     }),
     game({
@@ -236,6 +253,7 @@ export const GAMES: GameDef[] = [
     }),
     game({
         id: 'sueca',
+        layout: 'tally',
         title: 'Sueca',
         subtitle: 'Duplas · até 4 bandeiras',
         category: 'cartas',
@@ -255,6 +273,7 @@ export const GAMES: GameDef[] = [
     }),
     game({
         id: 'bisca',
+        layout: 'tally',
         title: 'Bisca',
         subtitle: 'Até 4 partidas',
         category: 'cartas',
@@ -292,6 +311,7 @@ export const GAMES: GameDef[] = [
     }),
     game({
         id: 'domino',
+        layout: 'tally',
         title: 'Dominó',
         subtitle: 'Duplas · até 6',
         category: 'mesa',
@@ -313,6 +333,7 @@ export const GAMES: GameDef[] = [
     }),
     game({
         id: 'sinuca',
+        layout: 'snooker',
         title: 'Sinuca',
         subtitle: 'Pontos por bola',
         category: 'mesa',
@@ -332,6 +353,7 @@ export const GAMES: GameDef[] = [
     }),
     game({
         id: 'bilhar',
+        layout: 'tally',
         title: 'Bilhar',
         subtitle: 'Partidas vencidas',
         category: 'mesa',
@@ -359,6 +381,7 @@ export const GAMES: GameDef[] = [
     }),
     game({
         id: 'dardos',
+        chalk: true,
         title: 'Dardos',
         subtitle: '501 até zerar',
         category: 'mesa',
@@ -394,6 +417,7 @@ export const GAMES: GameDef[] = [
     }),
     game({
         id: 'porrinha',
+        layout: 'tally',
         title: 'Porrinha',
         subtitle: 'Acertos · até 3',
         category: 'mesa',
@@ -567,6 +591,7 @@ export const GAMES: GameDef[] = [
     }),
     game({
         id: 'vitorias',
+        layout: 'tally',
         title: 'Vitórias',
         subtitle: 'Xadrez, dama, videogame...',
         category: 'outros',

@@ -1,25 +1,32 @@
 import type { ReactNode } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import type { Mode } from './src/engine/types';
+import type { Layout } from './src/engine/types';
 import { getGame } from './src/games/catalog';
+import CourtScreen from './src/screens/CourtScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import LivesScreen from './src/screens/LivesScreen';
-import RoundsScreen from './src/screens/RoundsScreen';
+import ScorepadScreen from './src/screens/ScorepadScreen';
 import SetupScreen from './src/screens/SetupScreen';
-import TapScreen from './src/screens/TapScreen';
-import TennisScreen from './src/screens/TennisScreen';
+import SnookerScreen from './src/screens/SnookerScreen';
+import SplitScreen from './src/screens/SplitScreen';
+import TallyScreen from './src/screens/TallyScreen';
+import TrucoScreen from './src/screens/TrucoScreen';
 import { useMatches } from './src/state/useMatches';
 import { useRouter } from './src/state/useRouter';
+import Logo from './src/ui/Logo';
 import type { PlayProps } from './src/ui/PlayShell';
 import { colors } from './src/ui/theme';
 
-const PLAY_SCREENS: Record<Mode, (props: PlayProps) => ReactNode> = {
-    tap: TapScreen,
-    rounds: RoundsScreen,
+const PLAY_SCREENS: Record<Layout, (props: PlayProps) => ReactNode> = {
+    truco: TrucoScreen,
+    tally: TallyScreen,
+    scorepad: ScorepadScreen,
+    court: CourtScreen,
+    split: SplitScreen,
+    snooker: SnookerScreen,
     lives: LivesScreen,
-    tennis: TennisScreen,
 };
 
 function Main() {
@@ -27,10 +34,11 @@ function Main() {
     const { matches, setMatch, removeMatch } = useMatches();
     const { route, setRoute } = useRouter();
 
+    // mesma cara da splash enquanto lê as partidas salvas
     if (matches === null) {
         return (
             <View style={styles.center}>
-                <ActivityIndicator size="large" color="#fff" />
+                <Logo size={120} framed={false} />
             </View>
         );
     }
@@ -52,10 +60,11 @@ function Main() {
 
     if (route.name === 'play' && match !== undefined) {
 
-        const Play = PLAY_SCREENS[def.mode];
+        const Play = PLAY_SCREENS[def.layout];
 
         return (
             <Play
+                key={def.id}
                 def={def}
                 match={match}
                 onChange={next => setMatch(def.id, next)}
@@ -94,6 +103,6 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-    root: { flex: 1, backgroundColor: colors.bg },
-    center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bg },
+    root: { flex: 1, backgroundColor: colors.felt },
+    center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.felt },
 });

@@ -1,7 +1,10 @@
-// como a tela mostra o placar (o motor de pontos é o mesmo para tap, rounds e lives)
+// como o motor conta os pontos (o desenho da tela é o layout)
 export type Mode = 'tap' | 'rounds' | 'lives' | 'tennis';
 
 export type Category = 'cartas' | 'mesa' | 'esporte' | 'outros';
+
+// desenho da tela de placar (vários jogos dividem o mesmo)
+export type Layout = 'truco' | 'tally' | 'scorepad' | 'court' | 'split' | 'snooker' | 'lives';
 
 // none: só conta | reach: vence quem chega ao alvo | lowest: alguém chegou ao alvo, vence o menor
 // lastStanding: quem passa do limite sai, vence o último
@@ -32,6 +35,7 @@ export interface GameDef {
     subtitle: string;
     category: Category;
     mode: Mode;
+    layout: Layout;
     // true usa "Time 1", "Nós/Eles" nos nomes padrão
     teams: boolean;
     minPlayers: number;
@@ -56,7 +60,12 @@ export interface GameDef {
     bust: boolean;
     // aceita pontos negativos digitados (buraco)
     negative: boolean;
+    // no truco são os valores da mão (normal, truco, seis...), nos outros os botões de ponto
     buttons: ScoreButton[];
+    // pontos avulsos fora da mão (envido e flor no truco gaúcho)
+    extras: ScoreButton[];
+    // bloquinho em versão lousa (dardos)
+    chalk: boolean;
     // aviso quando alguém está a N pontos do alvo (mão de onze)
     alert: { below: number; text: string } | null;
     tennis: TennisRules | null;
