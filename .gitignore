@@ -1,0 +1,23 @@
+# dependências
+node_modules/
+
+# expo e builds
+.expo/
+dist/
+web-build/
+android/
+ios/
+
+# apk gerado pelo docker (vai nos releases do github, não no repositório)
+apk/
+*.apk
+*.aab
+
+# logs e sistema
+npm-debug.*
+*.log
+.DS_Store
+
+# variáveis locais
+.env
+.env.*

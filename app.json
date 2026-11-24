@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Placar",
+    "slug": "placar-cartas",
+    "version": "2.0.0",
+    "orientation": "default",
+    "backgroundColor": "#111114",
+    "platforms": ["ios", "android"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.exemplo.placarcartas"
+    },
+    "android": {
+      "package": "com.exemplo.placarcartas"
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "buildArchs": ["arm64-v8a"],
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true
+          }
+        }
+      ]
+    ]
+  }
+}

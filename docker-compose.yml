@@ -1,0 +1,51 @@
+services:
+  apk:
+    build: .
+    image: placar-builder
+    # as ferramentas do android só existem para x86_64 (em mac m1/m2 roda emulado, mais lento)
+    platform: linux/amd64
+    environment:
+      ANDROID_ARCHS: arm64-v8a
+      HOST_UID: ${HOST_UID:-}
+      HOST_GID: ${HOST_GID:-}
+    volumes:
+      # o projeto entra só como leitura, o build acontece numa cópia dentro do container
+      - .:/project:ro
+      - ./apk:/output
+      # caches para os próximos builds serem mais rápidos (somem com "down -v")
+      - gradle-cache:/root/.gradle
+      - npm-cache:/root/.npm
+    # $$ é o $ escapado do compose, a variável é lida pelo bash dentro do container
+    command:
+      - bash
+      - -euo
+      - pipefail
+      - -c
+      - |
+        echo "--- copiando o projeto"
+        # node_modules e android do host ficam de fora (podem ter sido gerados em outro sistema)
+        rsync -a --delete --exclude node_modules --exclude android --exclude .expo --exclude apk /project/ /build/
+        cd /build
+
+        echo "--- instalando as dependências"
+        npm ci --no-audit --no-fund
+
+        echo "--- gerando o projeto android"
+        npx expo prebuild --platform android --clean --no-install
+
+        echo "--- compilando o apk ($$ANDROID_ARCHS)"
+        cd android
+        ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures="$$ANDROID_ARCHS"
+
+        cp app/build/outputs/apk/release/app-release.apk /output/placar.apk
+
+        # no linux o arquivo sairia como root, então devolve para o usuário do host
+        if [ -n "$$HOST_UID" ]; then
+            chown "$$HOST_UID:$${HOST_GID:-$$HOST_UID}" /output /output/placar.apk
+        fi
+
+        echo "--- apk pronto em apk/placar.apk"
+
+volumes:
+  gradle-cache:
+  npm-cache:
